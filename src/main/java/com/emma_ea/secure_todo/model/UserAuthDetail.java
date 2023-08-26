@@ -57,6 +57,10 @@ public class UserAuthDetail implements UserDetails {
         this.password = password;
     }
 
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public String getPassword() {
         return password;
