@@ -6,6 +6,8 @@ import com.emma_ea.secure_todo.model.http.UserAuthRequest;
 import com.emma_ea.secure_todo.model.UserAuthDetail;
 import com.emma_ea.secure_todo.model.http.UserAuthResponse;
 import com.emma_ea.secure_todo.repository.UserAuthRepository;
+import com.emma_ea.secure_todo.token.EmailConfirmationService;
+import com.emma_ea.secure_todo.token.EmailConfirmationToken;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -16,10 +18,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class UserAuthService implements UserDetailsService {
     private  UserAuthRepository repository;
+    private EmailConfirmationService emailCTService;
     @Override
     public UserAuthDetail loadUserByUsername(String email) throws UsernameNotFoundException {
         return repository.findByEmail(email).orElseThrow(
@@ -35,7 +41,19 @@ public class UserAuthService implements UserDetailsService {
         String passwd = passwordEncoder().encode(user.getPassword().trim());
         user.setPassword(passwd);
         repository.save(user);
+
         // TODO: confirmation token
+        String token = UUID.randomUUID().toString();
+        EmailConfirmationToken emailCT = new EmailConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(30),
+                null,
+                user
+        );
+        emailCTService.saveConfirmationToken(emailCT);
+
+        // TODO: Send Email
 
         String msg = "Registration successful "+ user.getUsername() + ", Please verify email";
         return buildResponse(TodoRequestStatus.SUCCESS, HttpStatus.CREATED, msg, "access-token");
