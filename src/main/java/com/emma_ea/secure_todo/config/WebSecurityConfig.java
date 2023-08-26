@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -20,10 +21,13 @@ import static org.springframework.security.web.util.matcher.RegexRequestMatcher.
 
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
 public class WebSecurityConfig  {
 
     private UserAuthService authService;
+
+    public WebSecurityConfig(@Lazy UserAuthService authService) {
+        this.authService = authService;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

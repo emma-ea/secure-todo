@@ -37,7 +37,7 @@ public class UserAuthService implements UserDetailsService {
     private  UserAuthRepository repository;
     private EmailConfirmationService emailCTService;
     private AuthenticationManager authenticationManager;
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UserAuthDetail loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -54,7 +54,6 @@ public class UserAuthService implements UserDetailsService {
         user.setPassword(passwd);
         repository.save(user);
 
-        // TODO: confirmation token
         String token = UUID.randomUUID().toString();
         EmailConfirmationToken emailCT = new EmailConfirmationToken(
                 token,
@@ -72,6 +71,9 @@ public class UserAuthService implements UserDetailsService {
 
     public ResponseEntity<UserAuthEntity<UserAuthResponse>> signInUser(UserAuthRequest user) {
         UserAuthDetail authUser = loadUserByUsername(user.getEmail());
+        if (!authUser.isEnabled()) {
+            return buildResponse(SIGIN_ERROR, HttpStatus.FORBIDDEN, SIGN_IN_FAILED_VERIFY_EMAIL, null);
+        }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authUser.getEmail(),
