@@ -1,4 +1,4 @@
-package com.emma_ea.secure_todo.config;
+package com.emma_ea.secure_todo.constants;
 
 public class TodoRequestStatus {
     public static int SUCCESS = 100;
