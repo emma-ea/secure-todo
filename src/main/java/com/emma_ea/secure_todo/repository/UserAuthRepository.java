@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
+@Repository
 public interface UserAuthRepository extends JpaRepository<UserAuthDetail, Long> {
     Optional<UserAuthDetail> findByEmail(String email);
 }
