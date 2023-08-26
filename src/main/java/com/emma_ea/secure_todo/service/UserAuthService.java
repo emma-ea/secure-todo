@@ -1,6 +1,7 @@
 package com.emma_ea.secure_todo.service;
 
 import com.emma_ea.secure_todo.constants.TodoRequestStatus;
+import com.emma_ea.secure_todo.mail_service.EmailSenderService;
 import com.emma_ea.secure_todo.model.http.UserAuthEntity;
 import com.emma_ea.secure_todo.model.http.UserAuthRequest;
 import com.emma_ea.secure_todo.model.UserAuthDetail;
@@ -8,6 +9,7 @@ import com.emma_ea.secure_todo.model.http.UserAuthResponse;
 import com.emma_ea.secure_todo.repository.UserAuthRepository;
 import com.emma_ea.secure_todo.token.EmailConfirmationService;
 import com.emma_ea.secure_todo.token.EmailConfirmationToken;
+import com.emma_ea.secure_todo.utils.EmailBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -38,6 +40,8 @@ public class UserAuthService implements UserDetailsService {
     private EmailConfirmationService emailCTService;
     private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
+    private EmailSenderService emailSender;
+    private EmailConfirmationService emailService;
 
     @Override
     public UserAuthDetail loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -65,6 +69,8 @@ public class UserAuthService implements UserDetailsService {
         emailCTService.saveConfirmationToken(emailCT);
 
         // TODO: Send Email
+        String link = String.format("%s/api/v1/auth/confirm?token=%s", URL, token);
+        emailSender.sendTo(user.getEmail(), CONFIRM_EMAIL, EmailBuilder.buildEmail(user.getUsername(), link));
 
         return buildResponse(SUCCESS, HttpStatus.CREATED, EMAIL_NEED_VERIFICATION(user.getUsername()), "access-token");
     }
@@ -86,6 +92,18 @@ public class UserAuthService implements UserDetailsService {
         }
 
         return buildResponse(SUCCESS, HttpStatus.OK, SIGN_IN_SUCCESS, "refresh-token");
+    }
+
+    public String confirmEmail(String token) {
+        try {
+            UserAuthDetail user =  emailService.confirmEmail(token);
+            user.setEnabled(true);
+            repository.save(user);
+            return user.getUsername() + ", email confirmed";
+        } catch (Exception e) {
+            return "Couldn't verify email";
+        }
+
     }
 
 }

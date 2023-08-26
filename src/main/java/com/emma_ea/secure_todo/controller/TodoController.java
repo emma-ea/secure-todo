@@ -14,20 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
-@AllArgsConstructor
 public class TodoController {
-
-    private UserSignInSignUpService service;
-
-    @PostMapping("/auth/register")
-    public ResponseEntity<UserAuthEntity<UserAuthResponse>> signUp(@RequestBody UserAuthRequest user) {
-        return service.register(user);
-    }
-
-    @PostMapping("/auth/login")
-    public ResponseEntity<UserAuthEntity<UserAuthResponse>> signIn(@RequestBody UserAuthRequest user) {
-        return service.login(user);
-    }
 
     @GetMapping("/todos/all")
     public List<String> allTodos() {
