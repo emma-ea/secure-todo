@@ -101,7 +101,7 @@ public class UserAuthService implements UserDetailsService {
             repository.save(user);
             return user.getUsername() + ", email confirmed";
         } catch (Exception e) {
-            return "Couldn't verify email";
+            return "Couldn't verify email " + e.getMessage();
         }
 
     }

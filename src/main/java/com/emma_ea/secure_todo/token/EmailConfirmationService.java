@@ -29,7 +29,7 @@ public class EmailConfirmationService {
        if (emailToken.getConfirmedAt() != null) {
            throw new Exception("Email already confirmed");
        }
-       if (Duration.between(emailToken.getExpiresAt(), LocalDateTime.now()).isNegative()) {
+       if (Duration.between(LocalDateTime.now(), emailToken.getExpiresAt()).isNegative()) {
            throw new Exception("Email already expired");
        }
        emailToken.setConfirmedAt(LocalDateTime.now());
